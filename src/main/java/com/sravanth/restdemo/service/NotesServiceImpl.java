@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sravanth.restdemo.dao.NotesDAO;
+import com.sravanth.restdemo.dao.NotesRepository;
 import com.sravanth.restdemo.entity.NotesEntity;
 
 @Service
@@ -15,32 +16,41 @@ public class NotesServiceImpl implements NotesService{
 	
 	@Autowired
 	private NotesDAO notesDAO;
+	
+	@Autowired
+	private NotesRepository notesRepository;
 
 	@Override
 	@Transactional
 	public List<NotesEntity> getAllNotes() {
-		List<NotesEntity> notesList = notesDAO.getAllNotes();
+		List<NotesEntity> notesList = null;
+		//notesDAO.getAllNotes();
+		notesList = notesRepository.findAll();
 		return notesList;
 	}
 
 	@Override
 	@Transactional
 	public NotesEntity getNoteById(int id) {
-		NotesEntity notesEntity = notesDAO.getNoteById(id);
+		NotesEntity notesEntity = null;
+		//notesDAO.getNoteById(id);
+		notesEntity = notesRepository.findById(id).get();
 		return notesEntity;
 	}
 
 	@Override
 	@Transactional
 	public void addNotes(NotesEntity notesEntity) {
-		notesDAO.addNotes(notesEntity);
+		notesRepository.save(notesEntity);
+		//notesDAO.addNotes(notesEntity);
 		
 	}
 
 	@Override
 	@Transactional
 	public void deleteNotes(int id) {
-		notesDAO.deleteNotes(id);
+		notesRepository.deleteById(id);
+		//notesDAO.deleteNotes(id);
 		
 	}
 

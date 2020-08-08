@@ -1,16 +1,14 @@
 package com.sravanth.restdemo.controller;
 import com.sravanth.restdemo.exception.*;
 
-import java.io.IOException;
+
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,15 +19,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.sravanth.restdemo.bean.NotesErrorResponse;
 import com.sravanth.restdemo.entity.NotesEntity;
-import com.sravanth.restdemo.service.FileService;
-import com.sravanth.restdemo.service.ImageService;
 import com.sravanth.restdemo.service.NotesService;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/notes")
@@ -37,9 +31,6 @@ public class NotesController {
 	
 	@Autowired
 	private NotesService notesService;
-	
-	@Autowired
-	private FileService fileService;
 	
 	@GetMapping("/list")
 	public List<NotesEntity> getAllNotes(){
@@ -58,7 +49,7 @@ public class NotesController {
 		
 		return notesEntity;
 		else {
-			throw new NotesNotFoundException("Notes not found with id - "+id);
+			throw new NotesNotFoundException("No Notes found");
 		}
 	}
 	
@@ -87,57 +78,12 @@ public class NotesController {
 	public List<NotesEntity> searchNotes(@PathVariable String searchValue){
 		List<NotesEntity> notesList  = notesService.searchNotes(searchValue.toLowerCase());
 		if(notesList.size() == 0) {
-			throw new NotesNotFoundException("No Results Found ...");
+			throw new NotesNotFoundException("No results found, Please try again");
 		}else {
 			return notesList;
 		}
 		
 	}
-	
-	@PostMapping("/fileUpload")
-	public ResponseEntity<String> fileUpload(@RequestParam("file") MultipartFile file) {
-		System.out.println("in file upload controller");
-		String message = "";
-		
-		
-		if(!file.isEmpty()) {
-			message = fileService.saveFile(file);
-			message = message + " has been saved successfully";
-		}else {
-			System.out.println("file is empty");
-		}
-		System.out.println(message);
-		
-		return new ResponseEntity<>(message,HttpStatus.OK);
-				
-	}
-	
-	@GetMapping("/downloadFile/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
-        // Load file as Resource
-        Resource resource = fileService.loadFileAsResource(fileName);
-
-        // Try to determine file's content type
-        String contentType = null;
-        try {
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-        } catch (IOException ex) {
-            System.out.println("Could not determine");
-        }
-
-        // Fallback to the default content type if type could not be determined
-        if(contentType == null) {
-            contentType = "application/octet-stream";
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
-    }
-	
-	
-	
 	
 	@ExceptionHandler
 	public ResponseEntity<NotesErrorResponse>  handleException(NotesNotFoundException exception){

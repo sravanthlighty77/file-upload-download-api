@@ -23,7 +23,7 @@ public class NotesDAOImpl implements NotesDAO{
 	@Override
 	public List<NotesEntity> getAllNotes() {
 		Session currentSession = entityManager.unwrap(Session.class);
-		Query<NotesEntity> notesQuery = currentSession.createQuery("from NotesEntity", NotesEntity.class);
+		Query<NotesEntity> notesQuery = currentSession.createQuery("from NotesEntity order by id", NotesEntity.class);
 		List<NotesEntity> notesEntityList = notesQuery.getResultList();
 		if(notesEntityList.size()==0) {
 			
